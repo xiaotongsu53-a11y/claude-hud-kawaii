@@ -1,0 +1,12 @@
+diff --git a/src/render/lines/usage.ts b/src/render/lines/usage.ts
+--- a/src/render/lines/usage.ts
++++ b/src/render/lines/usage.ts
+@@ -120,7 +120,7 @@
+       forceLabel: true,
+       alignLabels,
+     });
+-    return `${usageLabel} ${fiveHourPart} | ${sevenDayPart}`;
++    return `${usageLabel} ${fiveHourPart}\n${sevenDayPart}`;
+   }
+
+   return `${usageLabel} ${fiveHourPart}`;

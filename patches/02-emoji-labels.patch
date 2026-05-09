@@ -1,0 +1,16 @@
+diff --git a/src/i18n/en.ts b/src/i18n/en.ts
+--- a/src/i18n/en.ts
++++ b/src/i18n/en.ts
+@@ -2,9 +2,9 @@
+
+ export const en: Messages = {
+   // Labels
+-  "label.context": "Context",
+-  "label.usage": "Usage",
+-  "label.weekly": "Weekly",
++  "label.context": "📊 Context",
++  "label.usage": "⚡ Usage",
++  "label.weekly": "📅 Weekly",
+   "label.approxRam": "Approx RAM",
+   "label.promptCache": "Cache",
+   "label.rules": "rules",
