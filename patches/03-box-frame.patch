@@ -1,0 +1,93 @@
+diff --git a/src/render/index.ts b/src/render/index.ts
+--- a/src/render/index.ts
++++ b/src/render/index.ts
+@@ -18,6 +18,7 @@
+ } from './lines/index.js';
+-import { dim, RESET } from './colors.js';
++import { dim, RESET, model as modelColor, project as projectColor, git as gitColor, gitBranch as gitBranchColor, label } from './colors.js';
+ import { getTerminalWidth, UNKNOWN_TERMINAL_WIDTH } from '../utils/terminal.js';
+ import { codePointCellWidth, isCjkAmbiguousWide } from './width.js';
++import { getModelName, formatModelName } from '../stdin.js';
+
+ // eslint-disable-next-line no-control-regex
+@@ -476,6 +477,66 @@
+
+   return lines;
+ }
+
++function renderBoxHeader(ctx: RenderContext): string {
++  const display = ctx.config?.display;
++  const colors = ctx.config?.colors;
++  let header = '';
++
++  if (display?.showModel !== false) {
++    const model = formatModelName(getModelName(ctx.stdin), display?.modelFormat, display?.modelOverride);
++    header += modelColor(`[ ${model} ]`, colors);
++    if (ctx.effortLevel) {
++      const sym = ctx.effortSymbol ? `${ctx.effortSymbol} ` : '';
++      header += ` ${sym}${modelColor(`[ ${ctx.effortLevel} ]`, colors)}`;
++    }
++  }
++
++  if (display?.showProject !== false && ctx.stdin.cwd) {
++    const segments = ctx.stdin.cwd.split(/[/\\]/).filter(Boolean);
++    const pathLevels = ctx.config?.pathLevels ?? 1;
++    const projectPath = segments.length > 0 ? segments.slice(-pathLevels).join('/') : '/';
++    header += ` on ${projectColor(`[ ${projectPath} ]`, colors)}`;
++  }
++
++  if (ctx.gitStatus && (ctx.config?.gitStatus?.enabled ?? true)) {
++    const dirty = (ctx.config?.gitStatus?.showDirty ?? true) && ctx.gitStatus.isDirty ? '*' : '';
++    header += ` ${gitColor('git:', colors)}${gitBranchColor(ctx.gitStatus.branch + dirty, colors)}`;
++  }
++
++  if (display?.showDuration !== false && ctx.sessionDuration) {
++    header += ` ${label(`[ ${ctx.sessionDuration} ]`, colors)}`;
++  }
++
++  return header;
++}
++
++function wrapInBox(lines: string[], terminalWidth: number): string[] {
++  if (lines.length === 0) return lines;
++  if (terminalWidth === UNKNOWN_TERMINAL_WIDTH || terminalWidth < 30) return lines;
++
++  const flat = lines.flatMap(l => l.split('\n'));
++  if (flat.length < 2) return lines;
++
++  const header = flat[0];
++  const body = flat.slice(1);
++  const headerW = visualLength(header);
++
++  const requested = Math.max(headerW + 4, Math.max(...body.map(visualLength), 0) + 2);
++  const innerWidth = Math.max(20, Math.min(terminalWidth - 2, requested));
++
++  const headerPadding = Math.max(0, innerWidth - headerW - 4);
++  const top = `╭─ ${header} ${'─'.repeat(headerPadding)}╮`;
++
++  const wrappedBody = body.map(line => {
++    const pad = Math.max(0, innerWidth - visualLength(line) - 2);
++    return `│ ${line}${' '.repeat(pad)} │`;
++  });
++
++  const bottom = `╰${'─'.repeat(innerWidth)}╯`;
++
++  return [top, ...wrappedBody, bottom];
++}
++
+ export function render(ctx: RenderContext): void {
+   const lineLayout = ctx.config?.lineLayout ?? 'expanded';
+@@ -512,8 +573,13 @@
+         const separatorWidth = terminalWidth
+           ? Math.min(separatorBaseWidth, terminalWidth)
+           : separatorBaseWidth;
+         lines.splice(firstActivityIndex, 0, makeSeparator(separatorWidth));
+       }
+     }
++
++    if (lines.length > 0) {
++      lines[0] = renderBoxHeader(ctx);
++      lines = wrapInBox(lines, terminalWidth);
++    }
+   } else {
+     const headerLines = renderCompact(ctx);

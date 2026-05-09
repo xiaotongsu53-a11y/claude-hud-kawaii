@@ -5,22 +5,29 @@
 ## 效果
 
 ```
-[Opus 4.7 ◕ xhigh] | data-pipeline git:(main*)
-📊 Context ░░░░░░░░░░  9%
-⚡ Usage   ░░░░░░░░░░  1% (resets in 3h 48m)
-📅 Weekly  ░░░░░░░░░░  0% (resets in 6d 23h)
+╭─ [ Opus 4.7 ] ◕ [ xhigh ] on [ data-pipeline ] git:main* [ 12m ] ──╮
+│ ▸ Context ██░░░░░░░░ 13%  (resets in 3h 31m)                       │
+│ ⚡ Usage   █░░░░░░░░░  2%  (resets in 3h 31m)                       │
+│ ◷ Weekly  ░░░░░░░░░░  0%  (resets in 6d 23h)                       │
+╰────────────────────────────────────────────────────────────────────╯
 ```
 
 ## 改动内容
 
-补丁只改两个文件，改动总共 4 行：
+三个 patch + 一个 config：
 
-1. `src/i18n/en.ts` — 给 Context / Usage / Weekly 标签前加 emoji
-2. `src/render/lines/usage.ts` — 把 `Usage | Weekly` 之间的 `|` 换成 `\n`，让两个用量窗口分行显示
+1. `src/render/lines/usage.ts` — 把 `Usage | Weekly` 改成 `Usage\nWeekly`，让两个用量窗口分行显示
+2. `src/i18n/en.ts` — 给 Context / Usage / Weekly 标签加图标（▸ ⚡ ◷）
+3. `src/render/index.ts` — 加外框 + 重排头部为 `[ model ] ◕ [ effort ] on [ project ] git:branch* [ duration ]`
 
 配套的 `config.json`：
 - `display.mergeGroups: []` — 不再把 `context` 和 `usage` 合并到同一行
-- `display.showEffortLevel: true` — 在模型名旁显示推理等级（low / medium / high / xhigh / max）
+- `display.showEffortLevel: true` — 在头部显示推理等级（low / medium / high / xhigh / max）
+
+## 限制
+
+- 底部 `▶▶ bypass permissions` 那行是 Claude Code 主程序画的，**不归 claude-hud 管**，所以框只包住 HUD 自己的 4 行。
+- 终端宽度小于 30 列时自动跳过外框，避免折行错乱。
 
 ## 安装
 
