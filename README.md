@@ -26,15 +26,20 @@
 
 前提：已经通过 `/plugin install claude-hud` 装好了官方插件。
 
+一行命令搞定：
+
 ```bash
-git clone https://github.com/xiaotongsu53-a11y/claude-hud-kawaii.git
-cd claude-hud-kawaii
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/xiaotongsu53-a11y/claude-hud-kawaii/main/install.sh | bash
 ```
 
-脚本会自动找到 `~/.claude/plugins/cache/*/claude-hud/<version>/` 下最新版本，应用 patch，并把 `config.json` 写到 `~/.claude/plugins/claude-hud/config.json`。
+脚本会自动：
+1. 找到 `~/.claude/plugins/cache/*/claude-hud/<version>/` 下最新版本
+2. 应用 emoji 标签 + Usage/Weekly 拆行的 patch
+3. 把 `config.json` 写到 `~/.claude/plugins/claude-hud/config.json`
 
 statusLine 立即生效，无需重启 Claude Code。
+
+> 想看脚本内容再决定要不要跑：[install.sh](./install.sh)
 
 ## 注意事项
 
